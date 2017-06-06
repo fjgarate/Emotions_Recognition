@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ERROR</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>ERROR</h1>
+    <p>Los parametros para realizar la llmada no son correctos</p>
+  </body>
+</html>
