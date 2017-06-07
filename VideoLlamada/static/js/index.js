@@ -385,6 +385,7 @@ function stop(message) {
 		}
 	}
 	hideSpinner(videoInput, videoOutput);
+	close();
 }
 
 function sendMessage(message) {
