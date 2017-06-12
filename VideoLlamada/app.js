@@ -203,9 +203,8 @@ CallMediaPipeline.prototype.createPipeline = function(from,callerId, calleeId, w
                         self.webRtcEndpoint[callerId] = callerWebRtcEndpoint;
                         self.webRtcEndpoint[calleeId] = calleeWebRtcEndpoint;
                         callback(null);
-                        //---
+               
                         var uri_call=folder+'call_'+from_call+argv.ext;
-                        console.log(uri_call)
                         pipeline.create('RecorderEndpoint', {uri: uri_call} ,function(error, callerRecorderEndpoint ) {
                             if (error) {
                                 pipeline.release();
@@ -215,7 +214,6 @@ CallMediaPipeline.prototype.createPipeline = function(from,callerId, calleeId, w
                             callerRecorderEndpoint.record();
                         });
                        uri_call=folder+'call_'+to_call+argv.ext;
-                       console.log(uri_call)
                         pipeline.create('RecorderEndpoint', {uri: uri_call} ,function(error, calleeRecorderEndpoint ) {
                             if (error) {
                                 pipeline.release();
@@ -224,7 +222,7 @@ CallMediaPipeline.prototype.createPipeline = function(from,callerId, calleeId, w
                             calleeWebRtcEndpoint.connect(calleeRecorderEndpoint);
                             calleeRecorderEndpoint.record();
                         });
-                        //---
+                      
                     });
                    
                 });
