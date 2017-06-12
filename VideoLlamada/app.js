@@ -260,7 +260,7 @@ var server = https.createServer(options, app).listen(port, function() {
 
 var wss = new ws.Server({
     server : server,
-    path : '/one2one'
+    path : '/videoLlamada'
 });
 
 wss.on('connection', function(ws) {
