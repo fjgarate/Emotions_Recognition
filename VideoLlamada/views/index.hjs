@@ -25,6 +25,8 @@
 <script>
 var to='{{to}}';
 var from='{{from}}'
+var role='{{role}}'
+console.log('ROL: '+role)
 </script>
     <script src="js/index.js"></script>
     <title>Video conferencia</title>
@@ -66,7 +68,11 @@ function desconexion(){
 	if(confirmar){
 		$('#acceso').toggle();
 		$('#acceso2').toggle();
+		if(role=='1'){
 		document.getElementById("usuario_llamar").innerHTML = "<img title='conectado' height=20px width=20px style='margin-right:10px' src='img/status-available.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='desconectado'></i> ";
+		}else{
+		document.getElementById("usuario_llamar").innerHTML ="<b>"+to+"</b>";
+		}
 		document.getElementById('saludo').innerHTML = "<span style='font-size:25px;margin:10px'> "+from+"</span><span style='color:#E81123;font-size:12px'>desconectado</span>";
 		setRegisterState(NOT_REGISTERED);
 		var message = {
@@ -127,10 +133,7 @@ function conexion(){
 		  <div id="usuarios" class="col-md-4"> 
 			  <div class="usuario" id="usuario">
 					<p id="usuario_llamar"></p>
-					<div class='iconos_llamadas'>
-				  	<!--   <a id='call' href='#'style='display:none'  class=''> <img height='35' width='35' class='icon_enable' id='icono_llamar' src='img/call.png' data-toggle='tooltip' title='llamar' alt='llamar' /></a>-->
-					<!--   <a href='#' id='terminate' style='display:none' ><img   data-toggle='tooltip' title='colgar' height='35' width='35'id='icono_colgar' class='icono_enable' src='img/hangup.png' /></a>-->
-                   <!--    <a id='calling' style="display:none" height='35' width='35' href='#' class="animate" ><img  id='ima' src='img/calling.png' data-toggle='tooltip' title='llamanado' alt='llamando' /></a>-->
+					<div class='iconos_llamadas'> 
 					</div>
 			 </div>
 		  </div>
@@ -145,8 +148,6 @@ function conexion(){
           </div>
           <div id="controls" style="display:none"> 
           <div class="panel_controls"   ></div>
-        <!--  <img class="controls2" style="margin-left:400px" height='45' width='45'  id='icono_llamar' src='img/hangup3.png' data-toggle='tooltip' title='colgar' alt='colgar' />
-        -->
           <span class="incons_controls" style="margin-left:400px;color:#E81123">
 			<i id="terminate" class=" glyphicon glyphicon-phone-alt mysize"  data-toggle='tooltip' title='colgar'></i> 
 		  </span>

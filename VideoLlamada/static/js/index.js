@@ -449,26 +449,31 @@ function getParameterByName(name) {
 }
 
 function usuarioLlamar(resp){
-	console.log(resp.response)
-	console.log(registerState)
+
 	if(registerState>0){
-	if(resp.response=="1"){
-	document.getElementById("usuario_llamar").innerHTML = "<img title='disponible' height=20px width=20px style='margin-right:10px' src='img/status-available.png' /><b>"+to+
+		if(role=='1'){
+			if(resp.response=="1"){
+		
+			document.getElementById("usuario_llamar").innerHTML = "<img title='disponible' height=20px width=20px style='margin-right:10px' src='img/status-available.png' /><b>"+to+
 	                                                       " </b><span data-toggle='tooltip' title='llamada de audio' id='call_audio' class='glyphicon glyphicon-earphone' style='cursor:pointer ;color:green;font-size:1em'></span> "+
 	                                                        "</b><span data-toggle='tooltip' title='video llamada' id='call' class='fa fa-video-camera' style='cursor:pointer ;color:green;font-size:1em'></span>";
-	  $('#icono_llamar').addClass('icono_enable');
-      $('#icono_llamar').removeClass('icono_disable');	
-		document.getElementById('call').addEventListener('click', function() {
-			call();
-		});
-				document.getElementById('terminate').addEventListener('click', function() {
-			stop();
-		});
-	}else if(resp.response=="2"){
-		document.getElementById("usuario_llamar").innerHTML = "<img title='desconectado' height=20px width=20px style='margin-right:10px' src='img/skype-status-dnd.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='desconectado'></i> ";
-	  }else{
-		  document.getElementById("usuario_llamar").innerHTML = "<img title='desconectado' height=20px width=20px style='margin-right:10px' src='img/status-away.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='ocupado'></i> ";
-		  }
+			$('#icono_llamar').addClass('icono_enable');
+			$('#icono_llamar').removeClass('icono_disable');	
+			document.getElementById('call').addEventListener('click', function() {
+				call();
+			});
+			document.getElementById('terminate').addEventListener('click', function() {
+				stop();
+			});
+			
+		}else if(resp.response=="2"){
+			document.getElementById("usuario_llamar").innerHTML = "<img title='desconectado' height=20px width=20px style='margin-right:10px' src='img/skype-status-dnd.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='desconectado'></i> ";
+		  }else{
+			  document.getElementById("usuario_llamar").innerHTML = "<img title='desconectado' height=20px width=20px style='margin-right:10px' src='img/status-away.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='ocupado'></i> ";
+			  }
+		}else{
+			 document.getElementById("usuario_llamar").innerHTML = "<b>"+to+"</b>";
+		}
 	}
 }
 
