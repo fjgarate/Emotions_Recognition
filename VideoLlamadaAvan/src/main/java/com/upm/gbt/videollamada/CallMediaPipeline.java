@@ -35,7 +35,7 @@ import org.kurento.client.WebRtcEndpoint;
 public class CallMediaPipeline {
 
   private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
-  public static final String RECORDING_PATH = "file:///tmp/" + df.format(new Date()) + "-";
+  public static final String RECORDING_PATH = "file:///tmp/"+ df.format(new Date()) + "/"+ df.format(new Date()) + "-";
   public static final String RECORDING_EXT = ".webm";
 
   private final MediaPipeline pipeline;
@@ -55,11 +55,12 @@ public class CallMediaPipeline {
 
     recorderCaller = new RecorderEndpoint.Builder(pipeline, RECORDING_PATH + from + RECORDING_EXT)
         .build();
+    System.out.println("URI "+recorderCaller.getUri());
     recorderCallee = new RecorderEndpoint.Builder(pipeline, RECORDING_PATH + to + RECORDING_EXT)
         .build();
 
     String appServerUrl = System.getProperty("app.server.url",
-        One2OneCallAdvApp.DEFAULT_APP_SERVER_URL);
+        VildeoLlamadaApp.DEFAULT_APP_SERVER_URL);
     FaceOverlayFilter faceOverlayFilterCaller = new FaceOverlayFilter.Builder(pipeline).build();
     faceOverlayFilterCaller.setOverlayedImage(appServerUrl + "/img/mario-wings.png", -0.35F, -1.2F,
         1.6F, 1.6F);

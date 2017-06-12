@@ -44,6 +44,29 @@
 			<artifactId>spring-websocket</artifactId>
 			    <version>4.3.8.RELEASE</version>
 		</dependency>
+		
+		<!-- JSTL for JSP -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+		</dependency>
+
+		<!-- Need this to compile JSP -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Need this to compile JSP,
+			tomcat-embed-jasper version is not working, no idea why -->
+		<dependency>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
+			<artifactId>ecj</artifactId>
+			<version>4.6.1</version>
+			<scope>provided</scope>
+		</dependency>
+		
 			<!-- Kurento -->
 		<dependency>
 			<groupId>org.kurento</groupId>
@@ -90,6 +113,11 @@
 			<groupId>org.webjars.bower</groupId>
 			<artifactId>ekko-lightbox</artifactId>
 			  <version>4.0.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.webjars</groupId>
+		    <artifactId>font-awesome</artifactId>
+		    <version>4.7.0</version>
 		</dependency>
 	</dependencies>
 

@@ -34,7 +34,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
  */
 @SpringBootApplication
 @EnableWebSocket
-public class One2OneCallAdvApp implements WebSocketConfigurer {
+public class VildeoLlamadaApp implements WebSocketConfigurer {
 
 final static String DEFAULT_KMS_WS_URI = "ws://138.4.10.136:8888/kurento";
   static final String DEFAULT_APP_SERVER_URL = "https://localhost:8443";
@@ -61,7 +61,7 @@ final static String DEFAULT_KMS_WS_URI = "ws://138.4.10.136:8888/kurento";
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplication(One2OneCallAdvApp.class).run(args);
+    new SpringApplication(VildeoLlamadaApp.class).run(args);
   }
 
 }

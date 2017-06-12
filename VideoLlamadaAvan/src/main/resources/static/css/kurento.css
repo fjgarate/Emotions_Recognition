@@ -43,9 +43,8 @@ video, #console {
 }
 
 #console {
-	overflow-y: auto;
-	width: 100%;
-	height: 175px;
+	min-height: 120px;
+	max-height: 360px;
 }
 
 #videoContainer {
@@ -71,10 +70,115 @@ div#videoSmall {
 	cursor: pointer;
 	z-index: 10;
 	padding: 0px;
+	
 }
 
 div.dragged {
 	cursor: all-scroll !important;
 	border-color: blue !important;
 	z-index: 10 !important;
+}
+img:hover {
+    opacity: 0.5;
+    filter: alpha(opacity=50); /* For IE8 and earlier */
+}
+#icon_colgar_disable{
+opacity: 0.5;
+	cursor:not-allowed;
+}
+#icon_llamar_disable{
+opacity: 0.5;
+	cursor:not-allowed;
+}
+#usuario_llamar{
+	font-size:18px;
+}
+.iconos_llamadas img{
+	margin-right :10px;
+}
+.usuario{
+	background:#d3d3d3;
+	padding:10px;
+	border-radius:10px;
+	border: 1px solid gray;
+}
+.page-header{
+	border-bottom:1px solid #ff8c00;
+}
+.icono_disable{
+	opacity: 0.5;
+	cursor:not-allowed;
+}
+.icono_enable{
+	opacity: 1;
+	cursor:poointer;
+}
+.panel_controls{
+	background:#000000;
+	height:60px;
+	width:300px;
+	position:absolute;
+	bottom:20px;
+	opacity:0.6;
+	margin-left:170px;
+	border-radius:30px;
+}
+.incons_controls{
+	position:absolute;
+	bottom:33px;
+
+}
+.disable_cam{
+	background-image: url("../img/cameraoff.png");
+	background-size: 45px 38px;
+	width:32px;
+	height:32px;
+	display:block !important;
+	margin-top:5px;
+	background-position:center;
+}
+.availabale{
+	background-image: url("../img/cameraoff.png");
+	width:20px;
+	height:20px;
+}
+.desco{
+	 background-image: url("../img/off.png");
+	 width:20px;
+	 height:20px;
+	 background-size:20px;
+	 margin-top:-25px;
+	 margin-right:100px;
+	 float:right;
+	 cursor:pointer;
+}
+.conex{
+	 background-image: url("../img/on.png");
+	 width:20px;
+	 height:20px;
+	 background-size:20px;
+	 margin-top:-25px;
+	 margin-right:100px;
+	 float:right;
+	 cursor:pointer;
+}
+.videoOutput_full { 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+    background: url(polina.jpg) no-repeat;
+    background-size: cover; 
+}
+.controls_full { 
+	position:fixed;
+	bottom:20px;
 }

@@ -38,7 +38,10 @@ public class UserRegistry {
     usersByName.put(user.getName(), user);
     usersBySessionId.put(user.getSession().getId(), user);
   }
-
+  public void unRegister(UserSession user) {
+	    usersByName.remove(user.getName(), user);
+	    usersBySessionId.remove(user.getSession().getId(), user);
+	  }
   public UserSession getByName(String name) {
     return usersByName.get(name);
   }

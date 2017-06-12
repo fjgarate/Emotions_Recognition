@@ -31,14 +31,14 @@ function setRegisterState(nextState) {
 	switch (nextState) {
 	case NOT_REGISTERED:
 		enableButton('#register', 'register()');
-		setCallState(DISABLED);
+	//	setCallState(DISABLED);
 		break;
 	case REGISTERING:
 		disableButton('#register');
 		break;
 	case REGISTERED:
 		disableButton('#register');
-		setCallState(NO_CALL);
+		setCallState();
 		break;
 	default:
 		return;
@@ -47,23 +47,32 @@ function setRegisterState(nextState) {
 }
 
 var callState = null;
-const NO_CALL = 0;
+const ERROR_CALL = 0;
 const IN_CALL = 1;
 const POST_CALL = 2;
-const DISABLED = 3;
+const PROCESSING_CALL = 3;
 const IN_PLAY = 4;
+const END_CALL = 5;
 
 function setCallState(nextState) {
 	switch (nextState) {
-	case NO_CALL:
+	case ERROR_CALL:
 		enableButton('#call', 'call()');
 		disableButton('#terminate');
 		disableButton('#play');
 		break;
-	case DISABLED:
-		disableButton('#call');
+	case PROCESSING_CALL:
+		/*disableButton('#call');
 		disableButton('#terminate');
-		disableButton('#play');
+		disableButton('#play');*/
+		   $('#saludo').html("<span style='font-size:25px;margin:10px'> "+from+"</span><span style='color:#1010A7;font-size:12px'>llamando...</span>");
+			$('#call').attr('disabled', true);
+			$('#terminate').attr('disabled', true);
+			$('#calling').addClass('pulse');
+			$('#calling').show();
+			$('#terminate').show();
+			$('#call').hide(); 
+			$('#controls').show();
 		break;
 	case POST_CALL:
 		enableButton('#call', 'call()');
@@ -71,10 +80,21 @@ function setCallState(nextState) {
 		enableButton('#play', 'play()');
 		break;
 	case IN_CALL:
+	    $('#usuario_llamar').html("<img title='disponible' height=20px width=20px style='margin-right:10px' src='img/status-available.png' /><b>"+to+" </b><span style='color:#1010A7;font-size:12px'>llamada aceptada</span>" );
+		$('#call').attr('disabled', true);
+		$('#terminate').attr('disabled', false);
+	
+		$('#call').hide();
+break;
 	case IN_PLAY:
 		disableButton('#call');
 		enableButton('#terminate', 'stop()');
 		disableButton('#play');
+		break;
+	case END_CALL:
+        $('#saludo').html("<span style='font-size:25px;margin:10px'> "+from+"</span><span style='color:green;font-size:12px'>conectado</span>");
+		$('#controls').hide();
+		   $('#usuario_llamar').html("<img title='disponible' height=20px width=20px style='margin-right:10px' src='img/status-available.png' /><b>"+to+" </b><span style='color:#1010A7;font-size:12px'>llamada finalizada</span>" );
 		break;
 	default:
 		return;
@@ -93,12 +113,27 @@ function enableButton(id, functionName) {
 }
 
 window.onload = function() {
-	console = new Console();
 	setRegisterState(NOT_REGISTERED);
 	var drag = new Draggabilly(document.getElementById('videoSmall'));
 	videoInput = document.getElementById('videoInput');
 	videoOutput = document.getElementById('videoOutput');
-	document.getElementById('name').focus();
+
+	if (from == '') {
+		window.alert("Nos eencuentra al usuario que recibe la llamada");
+		return;
+	}else{
+		console.log('busca al usuario '+from);
+		register_user(from);
+	}
+	
+	if (to == '') {
+		window.alert("Nos eencuentra al usuario que realiza la llamada");
+		return;
+	}else{
+		console.log('cregistra al usuario '+to);
+		busca_usuario()
+		
+	}
 }
 
 window.onbeforeunload = function() {
@@ -138,6 +173,10 @@ ws.onmessage = function(message) {
 				return console.error('Error adding candidate: ' + error);
 		});
 		break;
+	case 'buscaUsuarioResponse':
+		usuarioLlamar(parsedMessage)
+
+			break;
 	default:
 		console.error('Unrecognized message', parsedMessage);
 	}
@@ -146,14 +185,20 @@ ws.onmessage = function(message) {
 function resgisterResponse(message) {
 	if (message.response == 'accepted') {
 		setRegisterState(REGISTERED);
-		document.getElementById('peer').focus();
+		//document.getElementById('peer').focus();
+		document.getElementById('saludo').innerHTML = "<span style='font-size:25px;margin:10px'> "+from+"</span><span style='color:green;font-size:12px'>conectado</span>";
+
 	} else {
 		setRegisterState(NOT_REGISTERED);
 		var errorMessage = message.response ? message.response
 				: 'Unknown reason for register rejection.';
+		//console.log(errorMessage);
+		//document.getElementById('name').focus();
+		//alert('Error registering user. See console for further information.');
 		console.log(errorMessage);
-		document.getElementById('name').focus();
-		alert('Error registering user. See console for further information.');
+		alert('El usuario '+ from+' ya esta conectado en otro dispositivo');
+		document.getElementById('saludo').innerHTML = "<span style='font-size:25px;margin:10px'> "+from+"</span><span style='color:#ff8c00;font-size:12px'>ya esta conectado en otro dispositivo</span>";
+        $('#acceso').hide();
 	}
 }
 
@@ -161,7 +206,7 @@ function callResponse(message) {
 	if (message.response != 'accepted') {
 		console.info('Call not accepted by peer. Closing call');
 		stop();
-		setCallState(NO_CALL);
+		setCallState(ERROR_CALL);
 		if (message.message) {
 			alert(message.message);
 		}
@@ -200,7 +245,7 @@ function playResponse(message) {
 
 function incomingCall(message) {
 	// If bussy just reject without disturbing user
-	if (callState != NO_CALL && callState != POST_CALL) {
+	if (callState != ERROR_CALL && callState != POST_CALL) {
 		var response = {
 			id : 'incomingCallResponse',
 			from : message.from,
@@ -210,7 +255,7 @@ function incomingCall(message) {
 		return sendMessage(response);
 	}
 
-	setCallState(DISABLED);
+	setCallState(PROCESSING_CALL);
 	if (confirm('User ' + message.from
 			+ ' is calling you. Do you accept the call?')) {
 		showSpinner(videoInput, videoOutput);
@@ -268,13 +313,39 @@ function register() {
 	sendMessage(message);
 }
 
+// -------------
+function register_user() {
+
+	setRegisterState(REGISTERING);
+	var message = {
+		id : 'register',
+		name : from
+	};
+	sendMessage(message);
+	
+}
+function busca_usuario() {
+
+	//document.getElementById('peer').focus();
+	console.log('busca_usuario')
+	var message = {
+		id : 'buscaUsuario',
+		name : to
+	};
+	sendMessage(message);
+}
+
+// -------------
+
+
+
 function call() {
-	if (document.getElementById('peer').value == '') {
+	/*if (document.getElementById('peer').value == '') {
 		document.getElementById('peer').focus();
 		window.alert('You must specify the peer name');
 		return;
-	}
-	setCallState(DISABLED);
+	}*/
+	setCallState(PROCESSING_CALL);
 	showSpinner(videoInput, videoOutput);
 
 	var options = {
@@ -297,8 +368,8 @@ function onOfferCall(error, offerSdp) {
 	console.log('Invoking SDP offer callback function');
 	var message = {
 		id : 'call',
-		from : document.getElementById('name').value,
-		to : document.getElementById('peer').value,
+		from : from,
+		to : to,
 		sdpOffer : offerSdp
 	};
 	sendMessage(message);
@@ -313,7 +384,7 @@ function play() {
 	}
 
 	document.getElementById('videoSmall').style.display = 'none';
-	setCallState(DISABLED);
+	setCallState(PROCESSING_CALL);
 	showSpinner(videoOutput);
 
 	var options = {
@@ -346,6 +417,7 @@ function playEnd() {
 }
 
 function stop(message) {
+	setCallState(END_CALL);
 	var stopMessageId = (callState == IN_CALL) ? 'stop' : 'stopPlay';
 	setCallState(POST_CALL);
 	if (webRtcPeer) {
@@ -360,15 +432,31 @@ function stop(message) {
 		}
 	}
 	hideSpinner(videoInput, videoOutput);
-	document.getElementById('videoSmall').style.display = 'block';
+//	document.getElementById('videoSmall').style.display = 'block';
 }
 
 function sendMessage(message) {
 	var jsonMessage = JSON.stringify(message);
 	console.log('Senging message: ' + jsonMessage);
-	ws.send(jsonMessage);
-}
 
+	this.waitForConnection(function (){
+		ws.send(jsonMessage);
+		if(typeof callback !=='undefined'){
+			callback();
+			}
+		},1000);
+}
+this.waitForConnection = function (callback, interval) {
+    if (ws.readyState === 1) {
+        callback();
+    } else {
+        var that = this;
+        // optional: implement backoff for interval here
+        setTimeout(function () {
+            that.waitForConnection(callback, interval);
+        }, interval);
+    }
+};
 function onIceCandidate(candidate) {
 	console.log('Local candidate ' + JSON.stringify(candidate));
 
@@ -381,8 +469,8 @@ function onIceCandidate(candidate) {
 
 function showSpinner() {
 	for (var i = 0; i < arguments.length; i++) {
-		arguments[i].poster = './img/transparent-1px.png';
-		arguments[i].style.background = 'center transparent url("./img/spinner.gif") no-repeat';
+		arguments[i].poster = '/img/transparent-1px.png';
+		arguments[i].style.background = 'center transparent url("/img/spinner.gif") no-repeat';
 	}
 }
 
@@ -393,7 +481,38 @@ function hideSpinner() {
 		arguments[i].style.background = '';
 	}
 }
+function getParameterByName(name) {
+	
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+// -----------------------------
 
+function usuarioLlamar(resp){
+	console.log('resp.respo '+resp.response)
+	console.log('registerstate '+registerState)
+	if(registerState>0){
+	if(resp.response=="1"){
+	document.getElementById("usuario_llamar").innerHTML = "<img title='disponible' height=20px width=20px style='margin-right:10px' src='/img/status-available.png' /><b>"+to+
+	                                                       " </b><span data-toggle='tooltip' title='llamada de audio' id='call_audio' class='glyphicon glyphicon-earphone' style='cursor:pointer ;color:green;font-size:1em'></span> "+
+	                                                        "</b><span data-toggle='tooltip' title='video llamada' id='call' class='fa fa-video-camera' style='cursor:pointer ;color:green;font-size:1em'></span>";
+	  $('#icono_llamar').addClass('icono_enable');
+      $('#icono_llamar').removeClass('icono_disable');	
+		document.getElementById('call').addEventListener('click', function() {
+			call();
+		});
+				document.getElementById('terminate').addEventListener('click', function() {
+			stop();
+		});
+	}else if(resp.response=="2"){
+		document.getElementById("usuario_llamar").innerHTML = "<img title='desconectado' height=20px width=20px style='margin-right:10px' src='/img/skype-status-dnd.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='desconectado'></i> ";
+	  }else{
+		  document.getElementById("usuario_llamar").innerHTML = "<img title='desconectado' height=20px width=20px style='margin-right:10px' src='/img/status-away.png' /><b>"+to+"</b><i class='glyphicon glyphicon-remove' style='color:red;font-size:1em'  data-toggle='tooltip' title='ocupado'></i> ";
+		  }
+	}
+}
 /**
  * Lightbox utility (to display media pipeline image in a modal dialog)
  */
@@ -401,3 +520,55 @@ $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
 	event.preventDefault();
 	$(this).ekkoLightbox();
 });
+function cambia_audio(){
+
+	var audio =webRtcPeer.peerConnection.getLocalStreams()[0].getAudioTracks()[0];
+	console.log('audio: '+audio)
+		if(audio.enabled){
+			console.log('apaga')
+			audio.enabled=false;
+			$('#micro').removeClass('fa-microphone');
+			$('#micro').addClass('fa-microphone-slash');
+
+		}else{
+			console.log('enciendo')
+			audio.enabled=true;
+			$('#micro').removeClass('fa-microphone-slash');
+			$('#micro').addClass('fa-microphone');
+		}
+
+	}
+
+	function cambia_video(){
+	console.log('cambia')
+	var video =webRtcPeer.peerConnection.getLocalStreams()[0].getVideoTracks()[0];
+	console.log('video: '+video)
+		if(video.enabled){
+			video.enabled=false;
+			$('#cam').removeClass('fa-video-camera');
+			$('#cam').addClass('disable_cam');
+		}else{
+
+			video.enabled=true;
+			$('#cam').addClass('fa-video-camera');
+			$('#cam').removeClass('disable_cam');
+		}
+
+	}
+
+
+	// Event listener for the full-screen button
+	function full() {
+
+		var videoOutput = document.getElementById("videoOutput");
+		$('#videoOutput').toggleClass('videoOutput_full');
+		$('full').toggle();
+		$('#controls').toggleClass('controls_full');
+	  /*if (videoOutput.requestFullscreen) {
+	    videoOutput.requestFullscreen();
+	  } else if (videoOutput.mozRequestFullScreen) {
+	    videoOutput.mozRequestFullScreen(); // Firefox
+	  } else if (videoOutput.webkitRequestFullscreen) {
+	    videoOutput.webkitRequestFullscreen(); // Chrome and Safari
+	  }*/
+	}

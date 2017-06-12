@@ -71,6 +71,9 @@ public class CallHandler extends TextWebSocketHandler {
     }
 
     switch (jsonMessage.get("id").getAsString()) {
+      case "buscaUsuario":
+        buscaUsuario(jsonMessage.get("name").getAsString(),session);
+          break;
       case "register":
         register(session, jsonMessage);
         break;
@@ -101,6 +104,10 @@ public class CallHandler extends TextWebSocketHandler {
       case "stopPlay":
         releasePipeline(user);
         break;
+      case "desconexion":
+         /* no se si sera necesario */
+    	  registry.unRegister(user);
+          break;
       default:
         break;
     }
@@ -343,6 +350,55 @@ public class CallHandler extends TextWebSocketHandler {
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     stop(session);
     registry.removeBySession(session);
+  }
+  
+
+public void buscaUsuario( String userName,WebSocketSession session) throws IOException {
+
+	  JsonObject response = new JsonObject();
+	  UserSession user= registry.getByName(userName);
+	    response.addProperty("id", "buscaUsuarioResponse");
+
+	   if(user!=null){
+		  if( pipelines.get(user.getSessionId())!=null){
+			   //ocupado
+			    response.addProperty("response", "true");
+			
+		  }else{
+			//conectado
+			  response.addProperty("response", "1");
+		  }
+	   }else{
+		   //desconectado
+		   response.addProperty("response", "2");
+
+	   }
+	   session.sendMessage(new TextMessage(response.toString()));
+	/*   var user=userRegistry.getByName(name);
+	   console.log('por nombre '+user);
+
+	     try {
+			 if(user){
+				  console.log('por nombre '+pipelines[user.id]);
+				 var pipe =pipelines[user.id];
+				   if(pipe){
+					   //ocupado
+					   ws.send(JSON.stringify({id: 'buscaUsuarioResponse', response: 'true'}));
+				   }else{
+					    //conectado
+					   ws.send(JSON.stringify({id: 'buscaUsuarioResponse', response: '1'}));
+					   }
+	 
+			 }else{
+				 //desconectado
+				ws.send(JSON.stringify({id: 'buscaUsuarioResponse', response: '2'}));
+				}
+	    } catch(exception) {
+	        onError(exception);
+	    }
+	}
+
+  */
   }
 
 }
