@@ -8,24 +8,28 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path');
-
+var dateFormat = require('dateformat');
 var ws = require('ws');
 var minimist = require('minimist');
 var url = require('url');
 var kurento = require('kurento-client');
 var fs    = require('fs');
 var https = require('https');
-
+var from_call;
+var to_call;
 var options =
 {
   key:  fs.readFileSync('keys/server.key'),
   cert: fs.readFileSync('keys/server.crt')
 };
 
-
-var argv = minimist(process.argv.slice(2), {
+var now = new Date();
+var folder=dateFormat(now, "isoDateTime");
+var argv = minimist(process.argv.slice(3), {
   default: {
       as_uri: "https://localhost:8443/",
+      file_uri: 'file:///var/kurento/'+folder, // file to be stored in media server
+      ext: '.webm',
       ws_uri: "ws://138.4.10.136:8888/kurento"
   }
 });
@@ -125,8 +129,10 @@ function CallMediaPipeline() {
     this.webRtcEndpoint = {};
 }
 
-CallMediaPipeline.prototype.createPipeline = function(callerId, calleeId, ws, callback) {
+CallMediaPipeline.prototype.createPipeline = function(from,callerId, calleeId, ws, callback) {
     var self = this;
+    var folder=argv.file_uri+'_'+from_call+'_'+to_call+'/';
+    console.log('folder '+folder);
     getKurentoClient(function(error, kurentoClient) {
         if (error) {
             return callback(error);
@@ -136,13 +142,13 @@ CallMediaPipeline.prototype.createPipeline = function(callerId, calleeId, ws, ca
             if (error) {
                 return callback(error);
             }
-
+ 
             pipeline.create('WebRtcEndpoint', function(error, callerWebRtcEndpoint) {
                 if (error) {
                     pipeline.release();
                     return callback(error);
                 }
-
+    
                 if (candidatesQueue[callerId]) {
                     while(candidatesQueue[callerId].length) {
                         var candidate = candidatesQueue[callerId].shift();
@@ -163,7 +169,8 @@ CallMediaPipeline.prototype.createPipeline = function(callerId, calleeId, ws, ca
                         pipeline.release();
                         return callback(error);
                     }
-
+                  
+                  
                     if (candidatesQueue[calleeId]) {
                         while(candidatesQueue[calleeId].length) {
                             var candidate = candidatesQueue[calleeId].shift();
@@ -196,9 +203,35 @@ CallMediaPipeline.prototype.createPipeline = function(callerId, calleeId, ws, ca
                         self.webRtcEndpoint[callerId] = callerWebRtcEndpoint;
                         self.webRtcEndpoint[calleeId] = calleeWebRtcEndpoint;
                         callback(null);
+                        //---
+                        var uri_call=folder+'call_'+from_call+argv.ext;
+                        console.log(uri_call)
+                        pipeline.create('RecorderEndpoint', {uri: uri_call} ,function(error, callerRecorderEndpoint ) {
+                            if (error) {
+                                pipeline.release();
+                                return callback(error);
+                            }
+                            callerWebRtcEndpoint.connect(callerRecorderEndpoint);
+                            callerRecorderEndpoint.record();
+                        });
+                       uri_call=folder+'call_'+to_call+argv.ext;
+                       console.log(uri_call)
+                        pipeline.create('RecorderEndpoint', {uri: uri_call} ,function(error, calleeRecorderEndpoint ) {
+                            if (error) {
+                                pipeline.release();
+                                return callback(error);
+                            }
+                            calleeWebRtcEndpoint.connect(calleeRecorderEndpoint);
+                            calleeRecorderEndpoint.record();
+                        });
+                        //---
                     });
+                   
                 });
+                
             });
+           
+            
         });
     })
 };
@@ -365,12 +398,13 @@ function incomingCallResponse(calleeId, from, callResponse, calleeSdp, ws) {
         var pipeline = new CallMediaPipeline();
         pipelines[caller.id] = pipeline;
         pipelines[callee.id] = pipeline;
-
-        pipeline.createPipeline(caller.id, callee.id, ws, function(error) {
+       
+        pipeline.createPipeline(from,caller.id, callee.id, ws, function(error) {
             if (error) {
                 return onError(error, error);
             }
-
+         
+            
             pipeline.generateSdpAnswer(caller.id, caller.sdpOffer, function(error, callerSdpAnswer) {
                 if (error) {
                     return onError(error, error);
@@ -408,7 +442,8 @@ function incomingCallResponse(calleeId, from, callResponse, calleeSdp, ws) {
 
 function call(callerId, to, from, sdpOffer) {
     clearCandidatesQueue(callerId);
-
+    from_call=from;
+    to_call=to;
     var caller = userRegistry.getById(callerId);
     var rejectCause = 'User ' + to + ' is not registered';
     if (userRegistry.getByName(to)) {
@@ -460,11 +495,8 @@ function buscaUsuario(name ,ws, callback) {
 
    
    var user=userRegistry.getByName(name);
-   console.log('por nombre '+user);
-
      try {
 		 if(user){
-			  console.log('por nombre '+pipelines[user.id]);
 			 var pipe =pipelines[user.id];
 			   if(pipe){
 				   //ocupado

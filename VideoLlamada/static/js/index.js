@@ -173,6 +173,12 @@ ws.onmessage = function(message) {
 		console.info("Communication ended by remote peer");
 		stop(true);
 		break;
+		case 'playResponse':
+		playResponse(parsedMessage);
+		break;
+	case 'playEnd':
+		playEnd();
+		break;
 	case 'iceCandidate':
 		webRtcPeer.addIceCandidate(parsedMessage.candidate)
 		break;
@@ -542,3 +548,4 @@ function full() {
     videoOutput.webkitRequestFullscreen(); // Chrome and Safari
   }*/
 }
+
