@@ -19,6 +19,7 @@
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script>
+var uri ='https://138.4.10.142:8443/';
     var param = {
        to: 'paciente1',
        from: 'medico',
@@ -49,17 +50,17 @@
 function llama(){
 	var encode= b64EncodeUnicode(JSON.stringify(param)); // "4pyTIMOgIGxhIG1vZGU="
     console.log(encode)
-	window.open ('https://138.4.10.142:8443/'+encode,"_newtab");
+	window.open (uri+encode,"_newtab");
 	}
 function llama2(){
 	var encode= b64EncodeUnicode(JSON.stringify(param2)); // "4pyTIMOgIGxhIG1vZGU="
     console.log(encode)
-	window.open ('https://138.4.10.142:8443/'+encode,"_newtab");
+	window.open (uri+encode,"_newtab");
 	}
 function llama3(){
 	var encode= b64EncodeUnicode(JSON.stringify(param3)); // "4pyTIMOgIGxhIG1vZGU="
     console.log(encode)
-	window.open ('https://138.4.10.142:8443/'+encode,"_newtab");
+	window.open (uri+encode,"_newtab");
 	}
 </script>
 
