@@ -132,7 +132,6 @@ function CallMediaPipeline() {
 CallMediaPipeline.prototype.createPipeline = function(from,callerId, calleeId, ws, callback) {
     var self = this;
     var folder=argv.file_uri+'_'+from_call+'_'+to_call+'/';
-    console.log('folder '+folder);
     getKurentoClient(function(error, kurentoClient) {
         if (error) {
             return callback(error);
